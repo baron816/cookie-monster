@@ -1,0 +1,11 @@
+{
+  "short_name": "Cookie Monster",
+  "name": "Cookie Monster",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_icon": "cookie_monster.png",
+    "default_title": "Cookie Monster"
+  },
+  "version": "1.0"
+}
