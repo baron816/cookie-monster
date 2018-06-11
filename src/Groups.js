@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 
+import Group from './Group';
+
 import Cookies from 'js-cookie';
-import RadioInput from './RadioInput';
 import parseCookies, {removeCookieValue, splitCookieValue} from './parseCookies';
+import Divider from '@material-ui/core/Divider';
 
 export default class Groups extends Component {
   cookieHandlerLift = (fn) => (e) => {
@@ -24,38 +26,23 @@ export default class Groups extends Component {
   handleRemoveCookieValue = this.cookieHandlerLift(removeCookieValue);
 
   render() {
-    var groupKeys = Object.keys(this.props.groups);
     return (
       <div className='Groups'>
-        {groupKeys.map((groupKey) => {
-          var groupVal = this.props.groups[groupKey];
+        {Object.entries(this.props.groups)
+          .map(([groupKey, {options, selected}]) => {
           return (
-            <div key={groupKey}>
-              <h2>{groupKey}</h2>
-              <form>
-                <RadioInput
-                  name={groupKey}
-                  onChange={this.handleRemoveCookieValue}
-                  value={groupKey}
-                  checked={!groupVal.selectedOption}
-                >
-                  Disable
-                </RadioInput>
-                {groupVal.options.map((option) => {
-                  return (
-                    <RadioInput
-                      key={option}
-                      name={groupKey}
-                      value={groupKey + this.props.kvSeparator + option}
-                      onChange={this.handleChangeCookieValue}
-                      checked={groupVal.selectedOption === option}
-                    >
-                      {option}
-                    </RadioInput>
-                  )
-                })}
-              </form>
-            </div>
+            <React.Fragment key={groupKey}>
+            <Group
+              groupKey={groupKey}
+              kvSeparator={this.props.kvSeparator}
+              options={options}
+              handleAddOption={this.props.handleAddOption}
+              selected={selected}
+              setSelected={this.props.setSelected}
+              handleDeleteGroup={this.props.handleDeleteGroup}
+            />
+            <Divider />
+            </React.Fragment>
           )
         })}
       </div>

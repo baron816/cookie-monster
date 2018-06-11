@@ -1,44 +1,41 @@
 import React, { Component } from 'react';
 import './App.css';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Paper from '@material-ui/core/Paper';
 import Groups from './Groups';
 import AddGroup from './AddGroup';
+import 'typeface-roboto';
 
 class App extends Component {
   state = {
     cookieKey: "",
-    delimiter: "",
-    kvSeparator: "",
-    groups: {
-      WEB50321: {
-        options: [
-          "A_Control",
-          "B_Redesign"
-        ],
-      },
-      WEB49000: {
-        options: [
-          "A_Control",
-          "B_ShowModal",
-          "C_UpsellsOnly"
-        ]
-      }
-    }
+    delimiter: "&",
+    kvSeparator: "-",
+    defaultOption: "A_Control",
+    groups: {}
   }
   componentDidMount() {
     this.rehydrate();
   }
 
-  componentDidUpdate() {
+  persist = () => {
     localStorage.setItem('cookieMonsterState', JSON.stringify(this.state));
   }
 
-  setSelected = (groupKey, option) => {
+  setSelected = (groupKey) => (e) => {
+    var value = e.target.value
     this.setState((state) => {
-      var newGroup = Object.assign({}, state.groups[groupKey]);
-      newGroup.selectedOption = option;
-      var newGroups = Object.assign({}, state.groups, {[groupKey]: newGroup});
-      return Object.assign(state, {groups: newGroups})
-    })
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [groupKey]: {
+            ...state.groups[groupKey],
+            selected: value,
+          }
+        }
+      };
+    }, this.persist)
   }
 
   rehydrate = () => {
@@ -48,27 +45,62 @@ class App extends Component {
 
   handleAddGroup = (newGroupKey) => {
     this.setState((state) => {
-      var newGroups = Object.assign({}, state.groups);
-      newGroups[newGroupKey] = {
-        options: []
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [newGroupKey]: {
+            options: [this.state.defaultOption],
+            selected: `${newGroupKey}${this.state.kvSeparator}${this.state.defaultOption}`
+          }
+        }
       }
-      return Object.assign(state, {groups: newGroups});
-    })
+    }, this.persist)
+  }
+
+  handleAddOption = (value, groupKey) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [groupKey]: {
+            ...state.groups[groupKey],
+            options: [...this.state.groups[groupKey].options, value]
+          }
+        }
+      }
+    }, this.persist);
+  }
+
+  handleDeleteGroup = (groupKey) => () => {
+    this.setState((state) => {
+      var { [groupKey]: unused, ...groups } = state.groups;
+      return {
+        ...state,
+        groups
+      }
+    }, this.persist);
   }
 
   render() {
     return (
-      <div className="App">
-        <Groups
-          groups={this.state.groups}
-          delimiter={this.state.delimiter}
-          kvSeparator={this.state.kvSeparator}
-          cookieKey={this.state.cookieKey}
-          setSelected={this.setSelected}
-          setAllSelected={this.setAllSelected}
-        />
-        <AddGroup handleAddGroup={this.handleAddGroup}/>
-      </div>
+      <React.Fragment>
+        <CssBaseline />
+        <Paper>
+          <Groups
+            groups={this.state.groups}
+            delimiter={this.state.delimiter}
+            kvSeparator={this.state.kvSeparator}
+            cookieKey={this.state.cookieKey}
+            setSelected={this.setSelected}
+            setAllSelected={this.setAllSelected}
+            handleAddOption={this.handleAddOption}
+            handleDeleteGroup={this.handleDeleteGroup}
+          />
+          <AddGroup handleAddGroup={this.handleAddGroup}/>
+        </Paper>
+      </React.Fragment>
     )
   }
 }
