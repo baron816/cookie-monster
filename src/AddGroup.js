@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 
 export default class AddGroup extends Component {
   state = {
@@ -21,17 +23,21 @@ export default class AddGroup extends Component {
         <form
           onSubmit={this.handleSubmit}
         >
-          <label>
-            Add Group
-            <input
-              type="text"
-              placeholder="New Group"
-              name="newGroup"
-              onChange={this.handleChange}
-              value={this.state.newGroup}
-            />
-          </label>
-          <button type='submit'>+</button>
+          <TextField
+            id="AddGroup"
+            label="New Group"
+            name="newGroup"
+            value={this.state.newGroup}
+            onChange={this.handleChange}
+          />
+
+          <Button
+            variant="contained"
+            type="submit"
+            color="primary"
+          >
+            Add
+          </Button>
         </form>
       </div>
     )
