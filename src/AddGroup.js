@@ -13,8 +13,10 @@ export default class AddGroup extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.handleAddGroup(this.state.newGroup);
-    this.setState({newGroup: ''});
+    if (this.state.newGroup) {
+      this.props.handleAddGroup(this.state.newGroup);
+      this.setState({newGroup: ''});
+    }
   }
 
   render() {

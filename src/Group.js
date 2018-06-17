@@ -19,15 +19,18 @@ export default class Group extends Component {
   }
 
   addOption = () => {
-    this.props.handleAddOption(this.state.newOption, this.props.groupKey);
-    this.setState({ newOption: ''});
+    if (this.state.newOption) {
+      this.props.handleAddOption(this.state.newOption, this.props.groupKey);
+      this.setState({ newOption: ''});
+
+    }
   }
 
   render() {
     var {
       groupKey,
       options,
-      selectedIndex,
+      selected,
       kvSeparator,
       setSelected
     } = this.props;
@@ -38,16 +41,17 @@ export default class Group extends Component {
           <RadioGroup
             aria-label={groupKey}
             name={groupKey}
-            value={groupKey + kvSeparator + options[selectedIndex]}
-            onChange={setSelected}
+            value={selected}
+            onChange={setSelected(groupKey)}
           >
-            {this.props.options.map((option) => {
+            {options.map((option, index) => {
               return (
                 <FormControlLabel
                   value={groupKey + kvSeparator + option}
                   control={<Radio />}
                   label={option}
                   key={groupKey}
+                  index={index}
                 />
               )
             })}
@@ -62,11 +66,19 @@ export default class Group extends Component {
           onChange={this.handleChange}
         />
         <Button
-          variant="contained"
-          color="secondary"
+          variant="outlined"
+          color="primary"
           onClick={this.addOption}
         >
           Add
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={this.props.handleDeleteGroup(this.props.groupKey)}
+        >
+          Delete
         </Button>
       </div>
     )
