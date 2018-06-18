@@ -8,10 +8,13 @@ import Button from '@material-ui/core/Button';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import Switch from '@material-ui/core/Switch';
+import { withStyles } from "@material-ui/core/styles";
 
-export default class Group extends Component {
+class Group extends Component {
   state = {
-    newOption: ''
+    newOption: '',
+    editing: false,
   }
 
   handleChange = (e) => {
@@ -32,12 +35,24 @@ export default class Group extends Component {
       options,
       selected,
       kvSeparator,
-      setSelected
+      setSelected,
+      classes
     } = this.props;
+    var selectedVal = selected.split(kvSeparator)[1];
     return(
-      <div key={groupKey}>
+      <div key={groupKey} className={classes.group}>
         <FormControl component="fieldset" required>
           <FormLabel component="legend">{groupKey}</FormLabel>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={this.props.active}
+                onChange={this.props.flipGroupActiveState}
+                value={groupKey}
+              />
+            }
+            label="Active State"
+          />
           <RadioGroup
             aria-label={groupKey}
             name={groupKey}
@@ -57,22 +72,38 @@ export default class Group extends Component {
             })}
           </RadioGroup>
         </FormControl>
+        <form className={classes.addOption}>
+          <TextField
+            id="AddOption"
+            label="New Option"
+            name="newOption"
+            value={this.state.newOption}
+            onChange={this.handleChange}
+          />
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={this.addOption}
+          >
+            Add
+          </Button>
+        </form>
+        {this.state.editing ?
+          <TextField
+            id="EditOption"
+            label="Edit Option"
+            name="editOption"
+            value={selectedVal}
+            onChange={this.props.editSelected(groupKey)}
+            onBlur={() => this.setState({editing: false})}
+          /> : null}
 
-        <TextField
-          id="AddOption"
-          label="New Option"
-          name="newOption"
-          value={this.state.newOption}
-          onChange={this.handleChange}
-        />
         <Button
           variant="outlined"
-          color="primary"
-          onClick={this.addOption}
+          onClick={() => this.setState({editing: true})}
         >
-          Add
+          Edit
         </Button>
-
         <Button
           variant="outlined"
           color="secondary"
@@ -84,3 +115,14 @@ export default class Group extends Component {
     )
   }
 }
+
+var styles = {
+  addOption: {
+    marginBottom: 10,
+  },
+  group: {
+    marginBottom: 10,
+  }
+}
+
+export default withStyles(styles)(Group);

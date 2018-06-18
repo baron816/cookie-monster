@@ -1,6 +1,4 @@
 import React from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import HomeIcon from '@material-ui/icons/Home';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -46,9 +44,6 @@ function Settings(props) {
           margin="normal"
         />
       </form>
-      <IconButton aria-label="Settings" onClick={props.flipSettings}>
-        <HomeIcon />
-      </IconButton>
     </div>
   )
 }

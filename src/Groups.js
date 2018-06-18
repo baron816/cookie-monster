@@ -9,7 +9,7 @@ export default class Groups extends Component {
     return (
       <div className='Groups'>
         {Object.entries(this.props.groups)
-          .map(([groupKey, {options, selected}]) => {
+          .map(([groupKey, {options, selected, active}]) => {
           return (
             <React.Fragment key={groupKey}>
             <Group
@@ -20,6 +20,9 @@ export default class Groups extends Component {
               selected={selected}
               setSelected={this.props.setSelected}
               handleDeleteGroup={this.props.handleDeleteGroup}
+              active={active}
+              flipGroupActiveState={this.props.flipGroupActiveState}
+              editSelected={this.props.editSelected}
             />
             <Divider />
             </React.Fragment>

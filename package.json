@@ -11,7 +11,8 @@
     "js-cookie": "^2.2.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
-    "typeface-roboto": "^0.0.54"
+    "typeface-roboto": "^0.0.54",
+    "universal-cookie": "^2.2.0"
   },
   "scripts": {
     "start": "react-scripts start",

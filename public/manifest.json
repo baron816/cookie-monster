@@ -7,5 +7,10 @@
     "default_icon": "cookie_monster.png",
     "default_title": "Cookie Monster"
   },
-  "version": "1.0"
+  "permissions": [
+    "cookies",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "version": "1.1"
 }

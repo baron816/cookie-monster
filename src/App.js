@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { withStyles } from "@material-ui/core/styles";
 import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import SettingsIcon from '@material-ui/icons/Settings';
+
+import AppBar from './AppBar';
 import Groups from './Groups';
 import Settings from './Settings';
 import AddGroup from './AddGroup';
 import 'typeface-roboto';
 
-import parseCookies, {removeCookieValue} from './parseCookies';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
+import Cookies from 'universal-cookie';
+var cookies = new Cookies();
 
 class App extends Component {
   state = {
@@ -26,6 +28,7 @@ class App extends Component {
 
   persist = () => {
     localStorage.setItem('cookieMonsterState', JSON.stringify({...this.state, settingsActive: false}));
+    this.setCookies();
   };
 
   setSelected = (groupKey) => (e) => {
@@ -41,17 +44,7 @@ class App extends Component {
           }
         }
       };
-    }, () => {
-      this.persist();
-      var oldCookie = Cookies.get(this.state.cookieKey);
-      var newCookie = parseCookies({
-        delimiter: this.state.delimiter,
-        kvSeparator: this.state.kvSeparator,
-        oldCookie
-      }, value);
-
-      Cookies.set(this.state.cookieKey, newCookie);
-    })
+    }, this.persist);
   };
 
   rehydrate = () => {
@@ -67,7 +60,8 @@ class App extends Component {
           ...state.groups,
           [newGroupKey]: {
             options: [this.state.defaultOption],
-            selected: `${newGroupKey}${this.state.kvSeparator}${this.state.defaultOption}`
+            selected: `${newGroupKey}${this.state.kvSeparator}${this.state.defaultOption}`,
+            active: false,
           }
         }
       }
@@ -96,18 +90,25 @@ class App extends Component {
         ...state,
         groups
       }
-    }, () => {
-      this.persist();
-      var oldCookie = Cookies.get(this.state.cookieKey);
-      var newCookie = removeCookieValue({
-        delimiter: this.state.delimiter,
-        kvSeparator: this.state.kvSeparator,
-        oldCookie
-      }, groupKey);
-
-      Cookies.set(this.state.cookieKey, newCookie);
-    });
+    }, this.persist);
   };
+
+  flipGroupActiveState = (e) => {
+    var groupKey = e.target.value;
+
+    this.setState((state) => {
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [groupKey]: {
+            ...state.groups[groupKey],
+            active: !state.groups[groupKey].active
+          }
+        }
+      }
+    }, this.persist);
+  }
 
   flipSettings = () => {
     this.setState((state) => {
@@ -120,11 +121,42 @@ class App extends Component {
     this.setState({[e.target.name]: value}, this.persist);
   };
 
+  setCookies = () => {
+    var selectedGroups = Object.values(this.state.groups)
+      .filter((group) => group.active)
+      .map((group) => group.selected);
+
+    var cookieString = selectedGroups.join(this.state.delimiter);
+    cookies.set(this.state.cookieKey, cookieString);
+  }
+
+  editSelected = (groupKey) => (e) => {
+    var value = e.target.value;
+    this.setState((state) => {
+      var group = state.groups[groupKey];
+      var options = group.options;
+      var prevSelectedVal = group.selected.split(state.kvSeparator)[1];
+      var selectedIdx = group.options.indexOf(prevSelectedVal);
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [groupKey]: {
+            ...group,
+            selected: groupKey + state.kvSeparator + value,
+            options: [...options.slice(0, selectedIdx), value, ...options.slice(selectedIdx + 1, options.length)]
+          }
+        }
+      }
+    }, this.persist)
+  }
+
   render() {
     return (
-      <React.Fragment>
+      <div className={this.props.classes.root}>
         <CssBaseline />
-        <Paper>
+        <AppBar settingsActive={this.state.settingsActive} flipSettings={this.flipSettings} />
+        <Paper className={this.props.classes.paper}>
           {this.state.settingsActive ?
           <Settings
             flipSettings={this.flipSettings}
@@ -144,17 +176,26 @@ class App extends Component {
               setAllSelected={this.setAllSelected}
               handleAddOption={this.handleAddOption}
               handleDeleteGroup={this.handleDeleteGroup}
+              flipGroupActiveState={this.flipGroupActiveState}
+              editSelected={this.editSelected}
             />
             <AddGroup handleAddGroup={this.handleAddGroup}/>
-            <IconButton aria-label="Settings" onClick={this.flipSettings}>
-              <SettingsIcon />
-            </IconButton>
           </React.Fragment>
           }
         </Paper>
-      </React.Fragment>
+      </div>
     )
   }
 }
 
-export default App;
+var styles = {
+  root: {
+    minWidth: 300,
+  },
+  paper: {
+    margin: 10,
+    padding: 10,
+  }
+}
+
+export default withStyles(styles)(App);
