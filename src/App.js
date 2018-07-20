@@ -3,6 +3,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { withStyles } from "@material-ui/core/styles";
 import Paper from '@material-ui/core/Paper';
 
+import SearchBar from './SearchBar';
 import AppBar from './AppBar';
 import Groups from './Groups';
 import Settings from './Settings';
@@ -10,8 +11,6 @@ import AddGroup from './AddGroup';
 import 'typeface-roboto';
 
 // import Cookies from 'js-cookie';
-import Cookies from 'universal-cookie';
-var cookies = new Cookies();
 
 class App extends Component {
   state = {
@@ -21,6 +20,7 @@ class App extends Component {
     defaultOption: "",
     groups: {},
     settingsActive: false,
+    groupSearch: "",
   }
   componentDidMount() {
     this.rehydrate();
@@ -127,7 +127,9 @@ class App extends Component {
       .map((group) => group.selected);
 
     var cookieString = selectedGroups.join(this.state.delimiter);
-    cookies.set(this.state.cookieKey, cookieString);
+    window.chrome.tabs.query({active: true, lastFocusedWindow: true}, (resp) => {
+      window.chrome.cookies.set({name: this.state.cookieKey, value: cookieString, url: resp[0].url})
+    });
   }
 
   editSelected = (groupKey) => (e) => {
@@ -151,11 +153,20 @@ class App extends Component {
     }, this.persist)
   }
 
+  handleSearch = (e) => {
+    var groupSearch = e.target.value;
+
+    this.setState({groupSearch}, this.persist);
+  }
+
   render() {
     return (
       <div className={this.props.classes.root}>
         <CssBaseline />
         <AppBar settingsActive={this.state.settingsActive} flipSettings={this.flipSettings} />
+        <Paper className={this.props.classes.paper}>
+          <SearchBar term={this.state.groupSearch} onChange={this.handleSearch} />
+        </Paper>
         <Paper className={this.props.classes.paper}>
           {this.state.settingsActive ?
           <Settings
@@ -168,6 +179,7 @@ class App extends Component {
           />
           : <React.Fragment>
             <Groups
+              searchTerm={this.state.groupSearch}
               groups={this.state.groups}
               delimiter={this.state.delimiter}
               kvSeparator={this.state.kvSeparator}

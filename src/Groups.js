@@ -9,6 +9,7 @@ export default class Groups extends Component {
     return (
       <div className='Groups'>
         {Object.entries(this.props.groups)
+          .filter(([groupKey]) => groupKey.includes(this.props.searchTerm))
           .map(([groupKey, {options, selected, active}]) => {
           return (
             <React.Fragment key={groupKey}>
